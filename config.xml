@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets">
+    <name>OAuthTest</name>
+    <description>Just a test with the Javascript OAuth library.</description>
+    <author href="http://hcoder.org/">Esteban Manchado Velázquez</author>
+    <access origin="https://auth.opera.com" subdomains="true"/>
+    <!-- icon src="VideoFullscreen.png"/ -->
+</widget>
