@@ -1,5 +1,7 @@
 This is a not-yet-working Opera extension I'm using to experiment with
-OAuth in Javascript. Don't look at the code yet, it doesn't work :-)
-I'm only uploading now so I can check it out at work.
+OAuth in Javascript.
 
-When it's half-working I'll update/remove this note.
+It doesn't really work yet, but at least the Javascript used to make
+the OAuth requests works now (see oauthtestget.js for GET requests and
+oauthtest.js for POST requests), so you can have a look at the code
+and see how to adapt it for your own purposes.
