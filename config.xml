@@ -4,5 +4,6 @@
     <description>Just a test with the Javascript OAuth library.</description>
     <author href="http://hcoder.org/">Esteban Manchado Velázquez</author>
     <access origin="https://auth.opera.com" subdomains="true"/>
+    <access origin="https://link.api.opera.com" subdomains="true"/>
     <!-- icon src="VideoFullscreen.png"/ -->
 </widget>
