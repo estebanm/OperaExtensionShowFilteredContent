@@ -32,6 +32,7 @@ window.addEventListener('load',function(){
             if (event.ports.length > 0) {
                 if (popup) {
                     popup.postMessage(event.data.urls);
+                    popup = undefined;
                 }
             }
         }
