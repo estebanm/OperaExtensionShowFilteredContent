@@ -1,4 +1,47 @@
 window.addEventListener('load',function(){
+    var ToolbarUIItemProperties = {
+        disabled: false,
+        title: "Tell me tell me tell me",
+        icon: "icons/button.png",
+        popup: {
+            href: "popup.html",
+            width: 300,
+            height: 200,
+        },
+    }
+    theButton = opera.contexts.toolbar.createItem(ToolbarUIItemProperties);
+    opera.contexts.toolbar.addItem(theButton);
+
+
+    var popup;
+    opera.extension.onconnect = function(event) {
+        if (event.origin.indexOf("popup.html") > -1 &&
+                event.origin.indexOf("widget://") > -1) {
+            if (!popup) {
+                popup = event.source;
+            }
+            var tab = opera.extension.tabs.getFocused();
+            if (tab) {
+                tab.postMessage("gief-urls");
+            }
+        }
+    }
+
+    opera.extension.addEventListener('message', function(event) {
+        if (event.data.urls) {
+            if (event.ports.length > 0) {
+                if (popup) {
+                    popup.postMessage(event.data.urls);
+                }
+            }
+        }
+    }, false);
+
+
+    return;
+
+
+
     var accessor = {consumerKey     : "xQHqX5TehBRdcZK11x1AspwxT3Eu8Ip8",
                     consumerSecret  : "IQ9JhHo402UBJ3yx6vbDZwA1G0j9FL9K",
                     // If it's an access token request or a request to

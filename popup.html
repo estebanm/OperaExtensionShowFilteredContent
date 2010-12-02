@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Blocked URLs in this page</title>
+    <script>
+      window.addEventListener('load', function(event) {
+          opera.extension.addEventListener('message', function(event) {
+              var list = document.getElementById('url-list');
+              for (var i = 0; i < event.data.length; i++) {
+                  var li = document.createElement('li');
+                  li.innerHTML = event.data[i];
+                  list.appendChild(li);
+              }
+          }, false);
+      }, false);
+    </script>
+  </head>
+  <body>
+    <p><span id="number-blocked-elements"></span> elements blocked
+    on the current page</p>
+    <p>Details:</p>
+    <ul id="url-list"></ul>
+  </body>
+</html>
