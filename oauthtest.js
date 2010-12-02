@@ -1,7 +1,7 @@
 window.addEventListener('load',function(){
     var ToolbarUIItemProperties = {
         disabled: false,
-        title: "Tell me tell me tell me",
+        title: "See blocked URLs for this page",
         icon: "icons/button.png",
         popup: {
             href: "popup.html",
