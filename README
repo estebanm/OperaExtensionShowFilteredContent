@@ -1,7 +1,9 @@
-This is a not-yet-working Opera extension I'm using to experiment with
-OAuth in Javascript.
+This is a barely working Opera extension I'm using to experiment with
+OAuth in Javascript. It uses the Opera Link API to show the URLs of
+the blocked elements in the current page (if you're wondering if
+there's anything missing on the page because it's bloked, you can
+click on the pop-up and find out).
 
-It doesn't really work yet, but at least the Javascript used to make
-the OAuth requests works now (see oauthtestget.js for GET requests and
-oauthtest.js for POST requests), so you can have a look at the code
-and see how to adapt it for your own purposes.
+Besides, there are Javascript examples to illustrate how to make OAuth
+requests with the library I'm using (see oauthtestget.js for GET
+requests and oauthtest.js for POST requests).
