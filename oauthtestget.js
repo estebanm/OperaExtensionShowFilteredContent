@@ -1,3 +1,7 @@
+/*
+ * Example of how to make a GET OAuth request, once the access token and
+ * secret are known
+ */
 window.addEventListener('load',function(){
     var url = "https://link.api.opera.com/rest/speeddial/children";
     var accessor = {

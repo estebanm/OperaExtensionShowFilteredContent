@@ -1,5 +1,16 @@
+/*
+ * Example of how to get an access token from OAuth from scratch, and make a
+ * POST request with that access token.
+ * You'd have to:
+ * 1) Set requestType to 0, run the code to get the request token
+ * 2) Set the obtained (request) token under "case 1", set requestType to 1,
+ *    run the code again to get the access token
+ * 3) Set the obtained (access) token under "case 2", set requestType to 2, run
+ *    the code again to make the final request (adds a Speed Dial in position
+ *    10 if it's free; it will give an error otherwise)
+ */
 window.addEventListener('load',function(){
-    var requestType = 2;
+    var requestType = 0;
     var accessor = {consumerKey     : "xQHqX5TehBRdcZK11x1AspwxT3Eu8Ip8",
                     consumerSecret  : "IQ9JhHo402UBJ3yx6vbDZwA1G0j9FL9K"};
     var message = {method: "post"};
