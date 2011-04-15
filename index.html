@@ -36,6 +36,22 @@
                                             token.tokenSecret);
             });
         }
+        var popup;
+        opera.extension.onconnect = function(event) {
+            if (event.origin.indexOf("popup.html") > -1 &&
+                    event.origin.indexOf("widget://") > -1) {
+                popup = event.source;
+                var tab = opera.extension.tabs.getFocused();
+                if (tab) {
+                    tab.postMessage("fetch-urls");
+                }
+            }
+        };
+        opera.extension.onmessage = function(event) {
+            if (popup) {
+                popup.postMessage(event.data.urls);
+            }
+        };
     </script>
   </head>
   <body>

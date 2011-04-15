@@ -2,20 +2,44 @@
 <html>
   <head>
     <title>Blocked URLs in this page</title>
+    <link rel="stylesheet" href="main.css" />
     <script type="text/javascript" src="lib/oauthHelper.js" />
+    <script type="text/javascript" src="lib/urlfilter.js" />
     <script type="text/javascript" src="sha1.js" />
     <script type="text/javascript" src="oauth.js" />
     <script>
-      function showUrlFilters(urlFilterList) {
+      var urlFilterList = undefined;
+      var currentTabUrlList = undefined;
+
+      function showFilteredUrls(urlFilterList, tabUrls) {
+          var initMessage = window.document.getElementById('init-message');
+          initMessage.style.display = 'none';
+          var contentDiv = window.document.getElementById('content');
+          contentDiv.style.display = '';
+
+          opera.postError("I'm going to figure out which of these URLs: " + tabUrls + " are blacklisted by " + urlFilterList);
+
+          var urlfilter = new UrlFilter(urlFilterList);
+          var blockedUrls = urlfilter.getBlacklistedUrls(tabUrls);
+
           var numberBox = document.getElementById('number-blocked-elements');
-          numberBox.innerHTML = urlFilterList.length;
+          numberBox.innerHTML = blockedUrls.length;
           var list = document.getElementById('url-list');
-          for (var i = 0; i < urlFilterList.length; i++) {
+          for (var i = 0; i < blockedUrls.length; i++) {
               var li = document.createElement('li');
-              li.innerHTML = urlFilterList[i].properties.content;
+              var a = document.createElement('a');
+              a.href = a.innerHTML = blockedUrls[i];
+              li.appendChild(a);
               list.appendChild(li);
           }
       }
+
+      opera.extension.onmessage = function(event){
+          currentTabUrlList = event.data;
+          if (urlFilterList) {
+              showFilteredUrls(urlFilterList, currentTabUrlList);
+          }
+      };
 
       window.addEventListener("load", function(){
           window.document.getElementById("oauth-pin-code-button").addEventListener('click', function(event) {
@@ -34,8 +58,12 @@
                   window.localStorage.setItem("access-token-secret",
                                               accessToken.tokenSecret);
                   getUrlFilters(accessToken,
-                                function(urlFilterList) {
-                                      showUrlFilters(urlFilterList);
+                                function(urlList) {
+                                      urlFilterList = urlList;
+                                      if (currentTabUrlList != undefined) {
+                                          showFilteredUrls(urlFilterList,
+                                                           currentTabUrlList);
+                                      }
                                 });
                   });
           }, false);
@@ -54,15 +82,14 @@
               verifierButton.style.display = '';
           } else {
               getUrlFilters(accessToken,
-                            function(urlFilterList) {
-                                  showUrlFilters(urlFilterList);
+                            function(urlList) {
+                                  urlFilterList = urlList;
+                                  if (currentTabUrlList != undefined) {
+                                      showFilteredUrls(urlFilterList,
+                                                       currentTabUrlList);
+                                  }
                             });
           }
-
-          var initMessage = window.document.getElementById('init-message');
-          initMessage.style.display = 'none';
-          var contentDiv = window.document.getElementById('content');
-          contentDiv.style.display = '';
       }, false);
 
       function getUrlFilters(accessor, callback) {
@@ -95,10 +122,9 @@
     <input id="oauth-pin-code" type="text" style="display: none" />
     <input id="oauth-pin-code-button" type="button" value="Verify" style="display: none" />
 
-    <p id="init-message">Initialising...</p>
+    <p id="init-message"><img src="spinner.gif" /></p>
     <div id="content" style="display: none">
-      <p><span id="number-blocked-elements"></span> elements blocked
-      on the current page</p>
+      <p><span id="number-blocked-elements"></span> blocked elements</p>
       <ul id="url-list"></ul>
     </div>
   </body>
