@@ -2,10 +2,41 @@
 <html>
   <head>
     <title>My first extension</title>
-    <script type="text/javascript" src="sha1.js"></script>
-    <script type="text/javascript" src="oauth.js"></script>
-    <script type="text/javascript" src="oauthtest.js"></script>
-    <!-- script type="text/javascript" src="oauthtestget.js"></script -->
+    <script type="text/javascript" src="lib/urlfilter.js"></script>
+    <script type="text/javascript" src="sha1.js" />
+    <script type="text/javascript" src="oauth.js" />
+    <script type="text/javascript" src="lib/oauthHelper.js" />
+    <script>
+        var baseAuthUrl = "https://auth.opera.com/service/oauth";
+        var ToolbarUIItemProperties = {
+            disabled: false,
+            title: "See blocked URLs for this page",
+            icon: "icons/button.png",
+            popup: {
+                href: "popup.html",
+                width: 300,
+                height: 200
+            }
+        };
+        theButton = opera.contexts.toolbar.createItem(ToolbarUIItemProperties);
+        opera.contexts.toolbar.addItem(theButton);
+
+        var accessToken       = window.localStorage.getItem("access-token");
+        var accessTokenSecret = window.localStorage.getItem("access-token-secret");
+        if (accessToken == null) {
+            opera.postError('Requesting a request token');
+            getRequestToken(accessor, function(token) {
+                // Open a tab with the authorization page so the user
+                // can get the PIN and we can get the access token
+                opera.extension.tabs.create({
+                    url: baseAuthUrl + "/authorize?oauth_token=" +
+                                       token.token});
+                window.localStorage.setItem('request-token', token.token);
+                window.localStorage.setItem('request-token-secret',
+                                            token.tokenSecret);
+            });
+        }
+    </script>
   </head>
   <body>
     <h1>I don't think you're supposed to see this</h1>
