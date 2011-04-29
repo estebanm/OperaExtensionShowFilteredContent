@@ -1,11 +1,16 @@
 opera.extension.onmessage = function(event) {
     if (event.data == "fetch-urls") {
-        var imgs = document.getElementsByTagName('img');
-        var img_urls = [];
-        for (var i = 0; i < imgs.length; i++) {
-            img_urls.push(imgs[i].src);
+        var urls = [];
+        var elementsWithUrl = {'img':   'src',
+                               'embed': 'src',
+                               'link':  'href'};
+        for (var tag in elementsWithUrl) {
+            var tags = document.getElementsByTagName(tag);
+            for (var i = 0; i < tags.length; i++) {
+                urls.push(tags[i][elementsWithUrl[tag]]);
+            }
         }
         opera.extension.postMessage({'type': "urls",
-                                     'urls': img_urls});
+                                     'urls': urls});
     }
 }
