@@ -10,6 +10,7 @@
     <script>
       var urlFilterList = undefined;
       var currentTabUrlList = undefined;
+      var bgProcess;
 
       function showFilteredUrls(urlFilterList, tabUrls) {
           var initMessage = window.document.getElementById('init-message');
@@ -35,9 +36,13 @@
       }
 
       opera.extension.onmessage = function(event){
-          currentTabUrlList = event.data;
-          if (urlFilterList) {
+          if (event.data.type == 'urls') {
+              currentTabUrlList = event.data;
               showFilteredUrls(urlFilterList, currentTabUrlList);
+          } else if (event.data.type == 'ohhai') {
+              // Need to know how to communicate with the background process
+              // to send the "accessTokenDropped" message
+              bgProcess = event.source;
           }
       };
 
@@ -116,12 +121,16 @@
           var linkAPIRequest = new XMLHttpRequest();
           linkAPIRequest.onreadystatechange = function receiveRequestToken() {
               if (linkAPIRequest.readyState == 4) {
-                  if (linkAPIRequest.status != 200) {
-                      opera.postError("The response status wasn't 200, but " + linkAPIRequest.status + ", with content: " + linkAPIRequest.responseText);
+                  if (linkAPIRequest.status == 200) {
+                      opera.postError("URLFilters fetched: " + linkAPIRequest.responseText);
+                      callback(eval(linkAPIRequest.responseText));
+                  } else if (linkAPIRequest.status == 401) {
+                      opera.postError("The response status was 401, removing access token");
                       window.localStorage.removeItem("access-token");
-                      return;
+                      bgProcess.postMessage({'type': 'accessTokenDropped'});
+                  } else {
+                      opera.postError("The response status wasn't 200 or 401, but " + linkAPIRequest.status + ", with content: " + linkAPIRequest.responseText);
                   }
-                  callback(eval(linkAPIRequest.responseText));
               }
           }
           linkAPIRequest.open(message.method, message.action, true);
