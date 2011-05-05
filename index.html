@@ -57,7 +57,7 @@
         };
         opera.extension.onmessage = function(event) {
             if (popup && event.data.type == 'urls') {
-                popup.postMessage(event.data.urls);
+                popup.postMessage(event.data);
             } else if (event.data.type == 'accessTokenDropped') {
                 startOAuthDance(accessor);
             }

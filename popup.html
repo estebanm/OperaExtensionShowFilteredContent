@@ -12,15 +12,15 @@
       var currentTabUrlList = undefined;
       var bgProcess;
 
-      function showFilteredUrls(urlFilterList, tabUrls) {
+      function showFilteredUrls(filterList, tabUrls) {
           var initMessage = window.document.getElementById('init-message');
           initMessage.style.display = 'none';
           var contentDiv = window.document.getElementById('content');
           contentDiv.style.display = '';
 
-          opera.postError("I'm going to figure out which of these URLs: " + tabUrls + " are blacklisted by " + urlFilterList);
+          opera.postError("I'm going to figure out which of these URLs: " + tabUrls + " are blacklisted by " + filterList);
 
-          var urlfilter = new UrlFilter(urlFilterList);
+          var urlfilter = new UrlFilter(filterList);
           var blockedUrls = urlfilter.getBlacklistedUrls(tabUrls);
 
           var numberBox = document.getElementById('number-blocked-elements');
@@ -37,7 +37,7 @@
 
       opera.extension.onmessage = function(event){
           if (event.data.type == 'urls') {
-              currentTabUrlList = event.data;
+              currentTabUrlList = event.data.urls;
               showFilteredUrls(urlFilterList, currentTabUrlList);
           } else if (event.data.type == 'ohhai') {
               // Need to know how to communicate with the background process
