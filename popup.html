@@ -131,7 +131,6 @@
           linkAPIRequest.onreadystatechange = function receiveRequestToken() {
               if (linkAPIRequest.readyState == 4) {
                   if (linkAPIRequest.status == 200) {
-                      opera.postError("URLFilters fetched: " + linkAPIRequest.responseText);
                       callback(eval(linkAPIRequest.responseText));
                   } else if (linkAPIRequest.status == 401) {
                       opera.postError("The response status was 401, removing access token");
