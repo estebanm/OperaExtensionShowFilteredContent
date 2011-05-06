@@ -11,6 +11,7 @@
       var urlFilterList = undefined;
       var currentTabUrlList = undefined;
       var bgProcess;
+      var initMessageText;
 
       function showFilteredUrls(filterList, tabUrls) {
           var initMessage = window.document.getElementById('init-message');
@@ -38,7 +39,11 @@
       opera.extension.onmessage = function(event){
           if (event.data.type == 'urls') {
               currentTabUrlList = event.data.urls;
-              showFilteredUrls(urlFilterList, currentTabUrlList);
+              if (urlFilterList != undefined) {
+                  showFilteredUrls(urlFilterList, currentTabUrlList);
+              }
+          } else if (event.data.type == 'notab') {
+              initMessageText = "<p>Can't access the currently focused tab. Maybe it's an HTTPS site and you haven't enabled the extension to access secure sites?</p><p>See [Opera menu] &rarr; \"Extensions\" &rarr; \"Manage Extensions\" &rarr; [Gear icon] &rarr; \"Privacy\"</p>";
           } else if (event.data.type == 'ohhai') {
               // Need to know how to communicate with the background process
               // to send the "accessTokenDropped" message
@@ -82,6 +87,10 @@
                   });
           }, false);
 
+          if (initMessageText != undefined) {
+              window.document.getElementById('init-message').innerHTML =
+                  initMessageText;
+          }
           var accessToken = {
               "consumerKey":    accessor.consumerKey,
               "consumerSecret": accessor.consumerSecret,
