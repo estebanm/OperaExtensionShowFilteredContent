@@ -4,6 +4,7 @@
     <title>Blocked URLs in this page</title>
     <link rel="stylesheet" href="main.css" />
     <script type="text/javascript" src="lib/oauthHelper.js" />
+    <script type="text/javascript" src="lib/urlfilterHelper.js" />
     <script type="text/javascript" src="lib/urlfilter.js" />
     <script type="text/javascript" src="sha1.js" />
     <script type="text/javascript" src="oauth.js" />
@@ -19,7 +20,8 @@
           var contentDiv = window.document.getElementById('content');
           contentDiv.style.display = '';
 
-          opera.postError("I'm going to figure out which of these URLs: " + tabUrls + " are blacklisted by " + filterList);
+          opera.postError("I'm going to figure out which of these URLs: " +
+                              tabUrls + " are blacklisted by " + filterList);
 
           var urlfilter = new UrlFilter(filterList);
           var blockedUrls = urlfilter.getBlacklistedUrls(tabUrls);
@@ -52,7 +54,8 @@
       };
 
       window.addEventListener("load", function(){
-          window.document.getElementById("oauth-pin-code-button").addEventListener('click', function(event) {
+          window.document.getElementById("oauth-pin-code-button").
+                          addEventListener('click', function(event) {
               var requestToken       = {
                   'token': window.localStorage.getItem("request-token"),
                   'tokenSecret':
@@ -60,29 +63,33 @@
                   'consumerKey': accessor.consumerKey,
                   'consumerSecret': accessor.consumerSecret
               };
-              var verifier = window.document.getElementById("oauth-pin-code").
-                              value;
+              var verifierBox =
+                  window.document.getElementById('oauth-pin-code');
+              var verifierButton =
+                  window.document.getElementById('oauth-pin-code-button');
+              var spinner = window.document.getElementById('spinner');
+              var verifier = verifierBox.value;
               getAccessToken(requestToken, verifier, function(accessToken) {
                   window.localStorage.setItem("access-token",
                                               accessToken.token);
                   window.localStorage.setItem("access-token-secret",
                                               accessToken.tokenSecret);
-                  // Show the verifier textbox, hide the spinner
-                  var verifierBox =
-                      window.document.getElementById('oauth-pin-code');
-                  var verifierButton =
-                      window.document.getElementById('oauth-pin-code-button');
-                  var spinner = window.document.getElementById('spinner');
+                  bgProcess.postMessage({'type': 'accessTokenUpdated'});
+                  // Hide the verifier textbox, show the spinner
                   verifierBox.style.display = 'none';
                   verifierButton.style.display = 'none';
                   spinner.style.display = '';
                   getUrlFilters(accessToken,
                                 function(urlList) {
-                                      urlFilterList = urlList;
-                                      if (currentTabUrlList != undefined) {
-                                          showFilteredUrls(urlFilterList,
-                                                           currentTabUrlList);
-                                      }
+                                    urlFilterList = urlList;
+                                    if (currentTabUrlList != undefined) {
+                                        showFilteredUrls(urlFilterList,
+                                                         currentTabUrlList);
+                                    }
+                                },
+                                function () {
+                                    bgProcess.postMessage(
+                                        {'type': 'accessTokenDropped'});
                                 });
                   });
           }, false);
@@ -110,46 +117,22 @@
           } else {
               getUrlFilters(accessToken,
                             function(urlList) {
-                                  urlFilterList = urlList;
-                                  if (currentTabUrlList != undefined) {
-                                      showFilteredUrls(urlFilterList,
-                                                       currentTabUrlList);
-                                  }
+                                urlFilterList = urlList;
+                                if (currentTabUrlList != undefined) {
+                                    showFilteredUrls(urlFilterList,
+                                                     currentTabUrlList);
+                                }
+                            },
+                            function () {
+                                bgProcess.postMessage(
+                                    {'type': 'accessTokenDropped'});
                             });
           }
       }, false);
-
-      function getUrlFilters(accessor, callback) {
-          var message = {
-              action: "https://link.api.opera.com/rest/urlfilter/children",
-              method: "GET",
-              parameters: {}
-          };
-          opera.postError("Fetching URLFilters with access token " + accessor.token + ", access token secret " + accessor.tokenSecret);
-          OAuth.completeRequest(message, accessor);
-          var linkAPIRequest = new XMLHttpRequest();
-          linkAPIRequest.onreadystatechange = function receiveRequestToken() {
-              if (linkAPIRequest.readyState == 4) {
-                  if (linkAPIRequest.status == 200) {
-                      callback(eval(linkAPIRequest.responseText));
-                  } else if (linkAPIRequest.status == 401) {
-                      opera.postError("The response status was 401, removing access token");
-                      window.localStorage.removeItem("access-token");
-                      bgProcess.postMessage({'type': 'accessTokenDropped'});
-                  } else {
-                      opera.postError("The response status wasn't 200 or 401, but " + linkAPIRequest.status + ", with content: " + linkAPIRequest.responseText);
-                  }
-              }
-          }
-          linkAPIRequest.open(message.method, message.action, true);
-          var authHeader = OAuth.getAuthorizationHeader("", message.parameters);
-          linkAPIRequest.setRequestHeader("Authorization", authHeader);
-          linkAPIRequest.send("");
-      }
     </script>
   </head>
   <body>
-    <input id="oauth-pin-code" type="text" style="display: none" />
+    <input id="oauth-pin-code" type="text" autofocus style="display: none" />
     <input id="oauth-pin-code-button" type="button" value="Verify" style="display: none" />
 
     <p id="init-message"><img id="spinner" src="spinner.gif" /></p>
