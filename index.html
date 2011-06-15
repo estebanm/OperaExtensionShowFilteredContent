@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My first extension</title>
+    <title>Show Filtered Content</title>
     <script type="text/javascript" src="lib/urlfilter.js"></script>
     <script type="text/javascript" src="sha1.js" />
     <script type="text/javascript" src="oauth.js" />
     <script type="text/javascript" src="lib/oauthHelper.js" />
+    <script type="text/javascript" src="lib/urlfilterHelper.js" />
     <script>
         function startOAuthDance(accessor) {
-            opera.postError('Requesting a request token');
+            opera.postError('Requesting a RT');
             getRequestToken(accessor, function(token) {
                 // Open a tab with the authorization page so the user
                 // can get the PIN and we can get the access token
@@ -30,14 +31,22 @@
                 href: "popup.html",
                 width: 400,
                 height: 200
+            },
+            badge: {
+                display: "block",
+                textContent: "♻",
+                color: "white",
+                backgroundColor: "rgba(211, 0, 4, 1)"
             }
         };
         theButton = opera.contexts.toolbar.createItem(ToolbarUIItemProperties);
         opera.contexts.toolbar.addItem(theButton);
 
         var accessToken       = window.localStorage.getItem("access-token");
-        var accessTokenSecret = window.localStorage.getItem("access-token-secret");
+        var accessTokenSecret =
+            window.localStorage.getItem("access-token-secret");
         if (accessToken == null) {
+            theButton.badge.textContent = "!";
             startOAuthDance(accessor);
         }
         var popup;
@@ -57,11 +66,58 @@
                 }
             }
         };
+        opera.extension.ondisconnect = function(event) {
+            if (event.origin.indexOf("popup.html") > -1 &&
+                    event.origin.indexOf("widget://") > -1) {
+                popup = undefined;
+            }
+        };
         opera.extension.onmessage = function(event) {
-            if (popup && event.data.type == 'urls') {
-                popup.postMessage(event.data);
+            if (event.data.type == 'urls') {
+                if (popup) {
+                    opera.postError('Sending URLs to the popup');
+                    popup.postMessage(event.data);
+                } else {
+                    theButton.badge.textContent = "♻";
+                    var accessorWithAccessToken = {
+                        consumerKey    : accessor.consumerKey,
+                        consumerSecret : accessor.consumerSecret,
+                        token          : accessToken,
+                        tokenSecret    : accessTokenSecret};
+                    getUrlFilters(accessorWithAccessToken, function(uFList){
+                        var urlfilter = new UrlFilter(uFList);
+                        var blockedUrls =
+                            urlfilter.getBlacklistedUrls(event.data.urls);
+                        theButton.badge.textContent = blockedUrls.length;
+                    },
+                    function () {
+                        startOAuthDance(accessor);
+                    });
+                }
             } else if (event.data.type == 'accessTokenDropped') {
                 startOAuthDance(accessor);
+            } else if (event.data.type == 'accessTokenUpdated') {
+                accessToken = window.localStorage.getItem("access-token");
+                accessTokenSecret =
+                    window.localStorage.getItem("access-token-secret");
+                opera.postError('Received token ' + accessToken +
+                                    ' / ' + accessTokenSecret);
+            }
+        };
+        opera.extension.tabs.onfocus = function(event){
+            var tab = opera.extension.tabs.getFocused();
+            if (tab) {
+                // Don't do anything when the authorization URL is
+                // focused, to avoid infinite authorization windows
+                // popping up
+                var authorizationPageRegExp =
+                    new RegExp("auth.opera.com/service/oauth/authorize");
+                if (! tab.url.match(authorizationPageRegExp)) {
+                    theButton.badge.textContent = "♻";
+                    tab.postMessage("fetch-urls");
+                }
+            } else {
+                theButton.badge.textContent = "!";
             }
         };
     </script>
