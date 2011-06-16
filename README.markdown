@@ -22,8 +22,8 @@ License
 =======
 
 Except the file `oauth.js` (see that file's header for copyright
-information) and `icons/button.png`, the rest of the distribution is
-released under the Apache License:
+information), `sha1.js` (ditto) and `icons/button.png`, the rest of
+the distribution is released under the Apache License:
 
 
 Copyright 2011 Opera Software ASA
