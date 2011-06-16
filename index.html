@@ -22,6 +22,8 @@
             });
         }
 
+        // Clear the urlfilter cache on startup
+        window.localStorage.removeItem(urlFilterCacheKey);
         var baseAuthUrl = "https://auth.opera.com/service/oauth";
         var waitingForAuthorization = false;
         var ToolbarUIItemProperties = {
