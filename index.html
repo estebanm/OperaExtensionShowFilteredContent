@@ -22,6 +22,14 @@
             });
         }
 
+        function setBadgeLoading(badge) {
+            badge.textContent = "⟳";
+        }
+
+        function setBadgeWarning(badge) {
+            badge.textContent = "!";
+        }
+
         // Clear the urlfilter cache on startup
         window.localStorage.removeItem(urlFilterCacheKey);
         var baseAuthUrl = "https://auth.opera.com/service/oauth";
@@ -37,7 +45,7 @@
             },
             badge: {
                 display: "block",
-                textContent: "♻",
+                textContent: "",
                 color: "white",
                 backgroundColor: "rgba(211, 0, 4, 1)"
             }
@@ -49,7 +57,7 @@
         var accessTokenSecret =
             window.localStorage.getItem("access-token-secret");
         if (accessToken == null) {
-            theButton.badge.textContent = "!";
+            setBadgeWarning(theButton.badge);
             if (! waitingForAuthorization) {
                 waitingForAuthorization = true;
                 startOAuthDance(accessor);
@@ -84,7 +92,7 @@
                     opera.postError('Sending URLs to the popup');
                     popup.postMessage(event.data);
                 } else {
-                    theButton.badge.textContent = "♻";
+                    setBadgeLoading(theButton.badge);
                     var accessorWithAccessToken = {
                         consumerKey    : accessor.consumerKey,
                         consumerSecret : accessor.consumerSecret,
@@ -124,11 +132,11 @@
                 // focused, to avoid infinite authorization windows
                 // popping up
                 if (! waitingForAuthorization) {
-                    theButton.badge.textContent = "♻";
+                    setBadgeLoading(theButton.badge);
                     tab.postMessage("fetch-urls");
                 }
             } else {
-                theButton.badge.textContent = "!";
+                setBadgeWarning(theButton.badge);
             }
         };
     </script>
