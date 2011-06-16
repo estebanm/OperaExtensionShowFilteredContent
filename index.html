@@ -31,6 +31,7 @@
         }
 
         var baseAuthUrl = "https://auth.opera.com/service/oauth";
+        var waitingForAuthorization = false;
         var ToolbarUIItemProperties = {
             disabled: false,
             title: "See blocked URLs for this page",
@@ -55,7 +56,10 @@
             window.localStorage.getItem("access-token-secret");
         if (accessToken == null) {
             setBadgeWarning(theButton.badge);
-            startOAuthDance(accessor);
+            if (! waitingForAuthorization) {
+                waitingForAuthorization = true;
+                startOAuthDance(accessor);
+            }
         }
         var popup;
         opera.extension.onconnect = function(event) {
@@ -81,7 +85,7 @@
             }
         };
         opera.extension.onmessage = function(event) {
-            if (event.data.type == 'urls') {
+            if (event.data.type == 'urls' && ! waitingForAuthorization) {
                 if (popup) {
                     opera.postError('Sending URLs to the popup');
                     popup.postMessage(event.data);
@@ -99,12 +103,19 @@
                         theButton.badge.textContent = blockedUrls.length;
                     },
                     function () {
-                        startOAuthDance(accessor);
+                        if (! waitingForAuthorization) {
+                            waitingForAuthorization = true;
+                            startOAuthDance(accessor);
+                        }
                     });
                 }
             } else if (event.data.type == 'accessTokenDropped') {
-                startOAuthDance(accessor);
+                if (! waitingForAuthorization) {
+                    waitingForAuthorization = true;
+                    startOAuthDance(accessor);
+                }
             } else if (event.data.type == 'accessTokenUpdated') {
+                waitingForAuthorization = false;
                 accessToken = window.localStorage.getItem("access-token");
                 accessTokenSecret =
                     window.localStorage.getItem("access-token-secret");
@@ -118,9 +129,7 @@
                 // Don't do anything when the authorization URL is
                 // focused, to avoid infinite authorization windows
                 // popping up
-                var authorizationPageRegExp =
-                    new RegExp("auth.opera.com/service/oauth/authorize");
-                if (! tab.url.match(authorizationPageRegExp)) {
+                if (! waitingForAuthorization) {
                     setBadgeLoading(theButton.badge);
                     tab.postMessage("fetch-urls");
                 }
