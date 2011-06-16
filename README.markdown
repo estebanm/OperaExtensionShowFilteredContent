@@ -1,12 +1,14 @@
 Show Filtered Content
 =====================
 
-This is a very simple Opera extension that shows how to use OAuth (and
-the Opera Link API) from Javascript. It connects to the Opera Link API
-to get your "Content Blocker" URLs and it shows of many elements are
-blocked in the current page (eg. if you're wondering if there's
-anything missing on the page because it's blocked, you can click on
-the pop-up and find out).
+[Show Filtered Content](https://addons.opera.com/addons/extensions/details/show-filtered-content/)
+is a very simple
+[Opera extension](https://addons.opera.com/addons/extensions/) that
+shows how to use OAuth (and the Opera Link API) from Javascript. It
+connects to the Opera Link API to get your "Content Blocker" URLs and
+it shows of many elements are blocked in the current page (eg. if
+you're wondering if there's anything missing on the page because it's
+blocked, you can click on the pop-up and find out).
 
 Check these links for more information on the Opera Link API:
 
